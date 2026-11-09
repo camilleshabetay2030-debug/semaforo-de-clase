@@ -3190,19 +3190,24 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       socialButtonsBlockButton: { borderRadius: '999px' }
     }
   };
-  /* ---------- Bienvenida: cuenta primero, luego los datos de la clase ---------- */
-  var ONBOARD_KEY = 'sdc.onboarded';
+  /* ---------- Bienvenida: cuenta primero, luego los datos de la clase ----------
+     Se muestra cada vez que nadie tiene la sesión abierta en esta pestaña,
+     incluida la primera carga y justo después de que alguien cierre sesión,
+     para que el siguiente profesor entre con su propia cuenta. «Continuar sin
+     cuenta» solo la oculta por esta sesión del navegador, no para siempre. */
   var onboardingShown = false;
+  var skippedThisSession = false;
   function showOnboarding() {
     onboardingShown = true;
     $('onboarding').hidden = false;
     $('obStep1').hidden = false;
     $('obStep2').hidden = true;
+    $('obClerk').innerHTML = '';
+    if (window.Clerk) Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
   }
   function hideOnboarding() {
     onboardingShown = false;
     $('onboarding').hidden = true;
-    store.set(ONBOARD_KEY, true);
   }
   function obAdvanceToStep2() {
     $('obClerk').innerHTML = '';
@@ -3213,7 +3218,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     }
     $('obClassName').focus();
   }
-  $('btnSkipAccount').addEventListener('click', function () { hideOnboarding(); });
+  $('btnSkipAccount').addEventListener('click', function () { skippedThisSession = true; hideOnboarding(); });
   $('btnObContinue').addEventListener('click', function () {
     var name = $('obClassName').value.trim();
     if (name) {
@@ -3230,19 +3235,13 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
   function initAccount() {
     if (!window.Clerk) { setTimeout(initAccount, 300); return; }
     Clerk.load().then(function () {
-      var alreadyOnboarded = store.get(ONBOARD_KEY, false);
       if (Clerk.user) {
-        store.set(ONBOARD_KEY, true);
         updateAccountUI(true);
         loadProfilesFromServer();
       } else {
         updateAccountUI(false);
-        if (!alreadyOnboarded) {
-          showOnboarding();
-          Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
-        } else {
-          Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
-        }
+        Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
+        if (!skippedThisSession) showOnboarding();
       }
       Clerk.addListener(function (payload) {
         var signedIn = !!(payload && payload.user);
@@ -3251,8 +3250,11 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
           $('clerkSignIn').innerHTML = '';
           loadProfilesFromServer();
           if (onboardingShown && !$('obStep1').hidden) obAdvanceToStep2();
-        } else if (!$('clerkSignIn').hasChildNodes() && store.get(ONBOARD_KEY, false)) {
-          Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
+        } else {
+          if (!$('clerkSignIn').hasChildNodes()) Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
+          // alguien cerró sesión: invitar al siguiente profesor a entrar con la suya
+          skippedThisSession = false;
+          if (!onboardingShown) showOnboarding();
         }
       });
     }).catch(function () {});
