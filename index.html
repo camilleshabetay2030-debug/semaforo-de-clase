@@ -842,7 +842,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 
     <div class="notice" id="homeModelNotice">
       <svg><use href="#i-info"/></svg>
-      <div><strong>Estado del prototipo.</strong> <span id="homeModelText">Abre el semáforo, pulsa Iniciar y acepta el micrófono. El color cambia según el ruido del salón.</span></div>
+      <div><strong>Cómo empezar.</strong> <span id="homeModelText">Abre el semáforo, pulsa Iniciar y acepta el micrófono. El color cambia según el ruido del salón.</span></div>
     </div>
   </section>
 
@@ -891,11 +891,10 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     <article class="block" id="bloque-b">
       <div class="block-label">B · Por qué importa</div>
       <h2>El ruido también puede afectar el aprendizaje</h2>
-      <p class="prose">Investigaciones publicadas por otros autores han estudiado cómo el ruido interfiere con la comprensión oral, la lectura, la memoria y la comunicación en el aula. Estos son resultados de estudios anteriores, no de nuestro prototipo.</p>
+      <p class="prose">Investigaciones publicadas por otros autores han estudiado cómo el ruido interfiere con la comprensión oral, la lectura, la memoria y la comunicación en el aula.</p>
       <div class="ref-grid" id="refsWhy"></div>
       <div class="callout">
         <span class="tag tag-ext">Resultados de otras investigaciones</span>
-        <span class="tag tag-pending">Resultados de nuestro prototipo: aún no obtenidos</span>
       </div>
     </article>
 
@@ -1338,7 +1337,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     </header>
     <div id="conclusionsBody"></div>
 
-    <h2>Estado del prototipo</h2>
+    <h2>Qué incluye Semáforo de Clase</h2>
     <div class="status-grid" id="protoStatus"></div>
   </section>
 
@@ -2881,20 +2880,20 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       '<div class="panel"><h2 class="h-sm">Conclusiones</h2>' + (c.conclusions.pending ? '<span class="chip chip-muted">Pendiente del documento</span>' : '') + '<p>' + esc(c.conclusions.body) + '</p></div>' +
       '<div class="panel"><h2 class="h-sm">Recomendaciones</h2>' + (c.recommendations.pending ? '<span class="chip chip-muted">Pendiente del documento</span>' : '') + '<p>' + esc(c.recommendations.body) + '</p></div>' +
       '</div>' +
-      '<div class="panel"><h2 class="h-sm">Recomendaciones de uso del prototipo</h2><ul class="check-list">' +
+      '<div class="panel"><h2 class="h-sm">Recomendaciones de uso</h2><ul class="check-list">' +
       c.usage.map(function (u) { return '<li>' + icon('i-check') + '<span>' + esc(u) + '</span></li>'; }).join('') + '</ul></div>';
   }
 
   function renderProtoStatus() {
-    var pend = CONTENT.library.filter(function (s) { return s.pending; }).length;
     var items = [
-      ['Semáforo con estabilización y calibración por actividad', 'done', 'Implementado'],
-      ['Micrófono con calibración automática del silencio', 'done', 'Implementado'],
-      ['Simulador para practicar sin micrófono', 'done', 'Implementado'],
-      ['Biblioteca de la investigación', pend ? 'todo' : 'done', pend ? pend + ' apartados esperan el texto del documento' : 'Completa']
+      ['Semáforo en vivo', 'Se calibra solo al iniciar y se adapta a cada actividad de clase.'],
+      ['Micrófono preciso', 'Mide el volumen ponderado hacia la voz humana y se recupera solo si el navegador lo suspende.'],
+      ['Cuentas de profesor', 'Cada profesor guarda su propio semáforo con su cuenta, sin mezclarse con los de otros.'],
+      ['Simulador', 'Para practicar y mostrar el semáforo sin usar el micrófono.'],
+      ['Investigación completa', 'La encuesta, el marco teórico, la justificación y las conclusiones del proyecto.']
     ];
     $('protoStatus').innerHTML = items.map(function (it) {
-      return '<div class="st-item ' + it[1] + '">' + icon(it[1] === 'done' ? 'i-check' : 'i-info') + '<div><b>' + esc(it[0]) + '</b><span>' + esc(it[2]) + '</span></div></div>';
+      return '<div class="st-item done">' + icon('i-check') + '<div><b>' + esc(it[0]) + '</b><span>' + esc(it[1]) + '</span></div></div>';
     }).join('');
   }
 
