@@ -602,6 +602,27 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 .prof-bar select { width: auto; min-width: 0; max-width: 100%; flex: 0 1 320px; font-weight: 700; }
 .prof-bar .text-link { margin-top: 0; }
 
+/* ---------- Bienvenida / cuenta de profesor ---------- */
+.onboarding {
+  position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+  padding: 24px; overflow-y: auto;
+  background: radial-gradient(1100px 600px at 15% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, color-mix(in srgb, var(--go) 14%, transparent), transparent 55%), var(--bg);
+}
+.onboarding-card {
+  width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 36px 32px; box-shadow: var(--shadow); text-align: center;
+}
+.onboarding-logo { border-radius: 18px; margin-bottom: 14px; }
+.onboarding-card h1 { font-size: 1.5rem; }
+.onboarding-card .lead { font-size: 1rem; margin: 10px 0 18px; max-width: none; }
+.onboarding-card .lbl { text-align: left; }
+.onboarding-card input { text-align: left; }
+.onboarding-card .btn.wide { width: 100%; margin-top: 18px; }
+.onboarding-card .text-link { margin-top: 16px; display: inline-flex; align-items: center; gap: 6px; }
+.onboarding-card .text-link svg { width: 15px; height: 15px; }
+#obClerk { margin: 4px 0; }
+
 /* ---------- Panel del profesor ---------- */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .account-panel { margin-bottom: 18px; }
@@ -718,6 +739,26 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
   Estás viendo una vista previa sin programas. Descarga el archivo <b>semaforo-de-clase.html</b>, búscalo en la carpeta Descargas, haz clic derecho sobre él y elige <b>Abrir con → Google Chrome</b>.
 </div>
 <a class="skip" href="#main">Saltar al contenido</a>
+
+<!-- ================= Bienvenida / cuenta de profesor ================= -->
+<div class="onboarding" id="onboarding" hidden>
+  <div class="onboarding-card">
+    <img class="onboarding-logo" src="assets/logo.svg" alt="" width="64" height="64">
+    <div id="obStep1">
+      <h1>Bienvenido a Semáforo de Clase</h1>
+      <p class="lead">Crea tu cuenta de profesor para guardar tu semáforo y que te acompañe en cualquier computadora.</p>
+      <div id="obClerk"></div>
+      <button class="text-link" id="btnSkipAccount">Continuar sin cuenta en esta laptop<svg><use href="#i-arrow"/></svg></button>
+    </div>
+    <div id="obStep2" hidden>
+      <h1>Datos de tu clase</h1>
+      <p class="lead">¿Cómo se llama tu semáforo? Por ejemplo, el curso, grado o grupo.</p>
+      <label for="obClassName" class="lbl">Nombre del semáforo</label>
+      <input id="obClassName" type="text" maxlength="40" placeholder="Ej.: Ciencias 8.° A — Prof. Gómez">
+      <button class="btn btn-primary wide" id="btnObContinue"><svg><use href="#i-check"/></svg>Empezar a usar el semáforo</button>
+    </div>
+  </div>
+</div>
 
 <div class="shell">
   <!-- ================= Barra lateral ================= -->
@@ -3140,15 +3181,59 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       socialButtonsBlockButton: { borderRadius: '999px' }
     }
   };
+  /* ---------- Bienvenida: cuenta primero, luego los datos de la clase ---------- */
+  var ONBOARD_KEY = 'sdc.onboarded';
+  var onboardingShown = false;
+  function showOnboarding() {
+    onboardingShown = true;
+    $('onboarding').hidden = false;
+    $('obStep1').hidden = false;
+    $('obStep2').hidden = true;
+  }
+  function hideOnboarding() {
+    onboardingShown = false;
+    $('onboarding').hidden = true;
+    store.set(ONBOARD_KEY, true);
+  }
+  function obAdvanceToStep2() {
+    $('obClerk').innerHTML = '';
+    $('obStep1').hidden = true;
+    $('obStep2').hidden = false;
+    if (activeProf && activeProf.name && activeProf.name !== 'Mi semáforo' && activeProf.name !== 'Semáforo de la clase') {
+      $('obClassName').value = activeProf.name;
+    }
+    $('obClassName').focus();
+  }
+  $('btnSkipAccount').addEventListener('click', function () { hideOnboarding(); });
+  $('btnObContinue').addEventListener('click', function () {
+    var name = $('obClassName').value.trim();
+    if (name) {
+      activeProf.name = name.slice(0, 40);
+      $('profName').value = activeProf.name;
+      saveProfiles(false);
+      applyProfile();
+      renderTeacher();
+    }
+    hideOnboarding();
+    location.hash = '#semaforo';
+  });
+
   function initAccount() {
     if (!window.Clerk) { setTimeout(initAccount, 300); return; }
     Clerk.load().then(function () {
+      var alreadyOnboarded = store.get(ONBOARD_KEY, false);
       if (Clerk.user) {
+        store.set(ONBOARD_KEY, true);
         updateAccountUI(true);
         loadProfilesFromServer();
       } else {
         updateAccountUI(false);
-        Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
+        if (!alreadyOnboarded) {
+          showOnboarding();
+          Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
+        } else {
+          Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
+        }
       }
       Clerk.addListener(function (payload) {
         var signedIn = !!(payload && payload.user);
@@ -3156,7 +3241,8 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
         if (signedIn) {
           $('clerkSignIn').innerHTML = '';
           loadProfilesFromServer();
-        } else if (!$('clerkSignIn').hasChildNodes()) {
+          if (onboardingShown && !$('obStep1').hidden) obAdvanceToStep2();
+        } else if (!$('clerkSignIn').hasChildNodes() && store.get(ONBOARD_KEY, false)) {
           Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
         }
       });
