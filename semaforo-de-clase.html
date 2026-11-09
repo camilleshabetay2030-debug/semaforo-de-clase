@@ -1931,6 +1931,9 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 
       function tick() {
         if (!self.analyser) return;
+        // el navegador puede "dormir" el AudioContext por ahorro de energía si pasa
+        // un rato sin interacción; si eso pasa, se reactiva solo en el siguiente cuadro.
+        if (self.ctx.state === 'suspended') { try { self.ctx.resume().catch(function () {}); } catch (e) {} }
         analyser.getFloatTimeDomainData(buf);
         var db = frameDb(buf);
         var now = performance.now();
@@ -1961,7 +1964,10 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 
         var lvl = Math.max(0, self.attack - self.floor); // dB por encima del silencio calibrado
         var cat = lvl >= self.thresholds.excesivo ? 'excesivo' : (lvl >= self.thresholds.moderado ? 'moderado' : 'tranquilo');
-        onPrediction({ label: 'Volumen del micrófono', category: cat, confidence: 1, levelDb: lvl, floorDb: self.floor, t: now });
+        // nunca dejar que un error en la interfaz detenga la medición del micrófono
+        try {
+          onPrediction({ label: 'Volumen del micrófono', category: cat, confidence: 1, levelDb: lvl, floorDb: self.floor, t: now });
+        } catch (e) {}
         self.raf = requestAnimationFrame(tick);
       }
       self.raf = requestAnimationFrame(tick);
@@ -3090,6 +3096,25 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     }
   }
 
+  var CLERK_APPEARANCE = {
+    variables: {
+      colorPrimary: '#6c5ce7',
+      colorBackground: '#ffffff',
+      colorText: '#1e1733',
+      colorTextSecondary: '#6f6886',
+      colorDanger: '#b8322a',
+      colorSuccess: '#1d8a4e',
+      colorInputBackground: '#f3effd',
+      colorInputText: '#1e1733',
+      borderRadius: '14px',
+      fontFamily: '"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif'
+    },
+    elements: {
+      card: { boxShadow: 'none', border: '1px solid #e7e1fb' },
+      formButtonPrimary: { borderRadius: '999px' },
+      socialButtonsBlockButton: { borderRadius: '999px' }
+    }
+  };
   function initAccount() {
     if (!window.Clerk) { setTimeout(initAccount, 300); return; }
     Clerk.load().then(function () {
@@ -3098,7 +3123,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
         loadProfilesFromServer();
       } else {
         updateAccountUI(false);
-        Clerk.mountSignIn($('clerkSignIn'));
+        Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
       }
       Clerk.addListener(function (payload) {
         var signedIn = !!(payload && payload.user);
@@ -3107,7 +3132,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
           $('clerkSignIn').innerHTML = '';
           loadProfilesFromServer();
         } else if (!$('clerkSignIn').hasChildNodes()) {
-          Clerk.mountSignIn($('clerkSignIn'));
+          Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
         }
       });
     }).catch(function () {});
