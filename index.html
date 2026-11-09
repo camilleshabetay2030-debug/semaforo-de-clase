@@ -623,6 +623,9 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 .onboarding-card .btn.wide { width: 100%; margin-top: 18px; }
 .onboarding-card .text-link { margin-top: 16px; display: inline-flex; align-items: center; gap: 6px; }
 .onboarding-card .text-link svg { width: 15px; height: 15px; }
+.ob-tabs { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 3px; gap: 3px; margin-bottom: 10px; }
+.ob-tab { font: inherit; font-weight: 700; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 8px 18px; border-radius: var(--radius-pill); cursor: pointer; }
+.ob-tab[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
 #obClerk { margin: 4px 0; max-width: 100%; overflow: hidden; }
 #obClerk .cl-rootBox, #obClerk .cl-card { width: 100% !important; max-width: 100% !important; }
 @media (max-width: 480px) {
@@ -755,7 +758,11 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     <img class="onboarding-logo" src="assets/logo.svg" alt="" width="64" height="64">
     <div id="obStep1">
       <h1>Bienvenido a Semáforo de Clase</h1>
-      <p class="lead">Crea tu cuenta de profesor para guardar tu semáforo y que te acompañe en cualquier computadora.</p>
+      <p class="lead">Crea tu cuenta de profesor para guardar tu semáforo, o inicia sesión si ya tienes una.</p>
+      <div class="ob-tabs" role="tablist" aria-label="Crear cuenta o iniciar sesión">
+        <button type="button" class="ob-tab" data-ob-tab="signup" role="tab" aria-selected="true">Registrarse</button>
+        <button type="button" class="ob-tab" data-ob-tab="signin" role="tab" aria-selected="false">Iniciar sesión</button>
+      </div>
       <div id="obClerk"></div>
       <button class="text-link" id="btnSkipAccount">Continuar sin cuenta en esta laptop<svg><use href="#i-arrow"/></svg></button>
     </div>
@@ -3188,6 +3195,55 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       socialButtonsBlockButton: { borderRadius: '999px' }
     }
   };
+  /* Traducción al español del formulario de Clerk (solo las cadenas más visibles;
+     lo que no se traduce aquí sigue mostrándose en el idioma por defecto). */
+  var CLERK_ES = {
+    locale: 'es-ES',
+    dividerText: 'o',
+    formFieldLabel__emailAddress: 'Correo electrónico',
+    formFieldLabel__password: 'Contraseña',
+    formFieldLabel__firstName: 'Nombre',
+    formFieldLabel__lastName: 'Apellido',
+    formFieldLabel__username: 'Usuario',
+    formFieldInputPlaceholder__emailAddress: 'tu@correo.com',
+    formFieldInputPlaceholder__password: 'Tu contraseña',
+    formButtonPrimary: 'Continuar',
+    formFieldAction__forgotPassword: 'Olvidé mi contraseña',
+    footerActionLink__useAnotherMethod: 'Usar otro método',
+    signIn: {
+      start: {
+        title: 'Iniciar sesión',
+        subtitle: 'Bienvenido de nuevo a Semáforo de Clase',
+        actionText: '¿No tienes cuenta?',
+        actionLink: 'Regístrate'
+      },
+      password: { title: 'Ingresa tu contraseña', actionLink: 'Usar otro método' },
+      forgotPasswordAlternativeMethods: { title: 'Olvidé mi contraseña' }
+    },
+    signUp: {
+      start: {
+        title: 'Crear una cuenta',
+        subtitle: 'Bienvenido a Semáforo de Clase',
+        actionText: '¿Ya tienes cuenta?',
+        actionLink: 'Inicia sesión'
+      }
+    },
+    userButton: { action__signOut: 'Cerrar sesión' }
+  };
+  /* Monta el formulario de Clerk en el contenedor de bienvenida, según la
+     pestaña elegida: Registrarse o Iniciar sesión. */
+  function mountObWidget(mode) {
+    if (!window.Clerk) return;
+    document.querySelectorAll('.ob-tab').forEach(function (b) {
+      b.setAttribute('aria-selected', String(b.getAttribute('data-ob-tab') === mode));
+    });
+    $('obClerk').innerHTML = '';
+    if (mode === 'signin') Clerk.mountSignIn($('obClerk'), { appearance: CLERK_APPEARANCE });
+    else Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
+  }
+  document.querySelectorAll('.ob-tab').forEach(function (b) {
+    b.addEventListener('click', function () { mountObWidget(b.getAttribute('data-ob-tab')); });
+  });
   /* ---------- Bienvenida: cuenta primero, luego los datos de la clase ----------
      Se muestra cada vez que nadie tiene la sesión abierta en esta pestaña,
      incluida la primera carga y justo después de que alguien cierre sesión,
@@ -3200,8 +3256,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     $('onboarding').hidden = false;
     $('obStep1').hidden = false;
     $('obStep2').hidden = true;
-    $('obClerk').innerHTML = '';
-    if (window.Clerk) Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
+    mountObWidget('signup');
   }
   function hideOnboarding() {
     onboardingShown = false;
@@ -3232,7 +3287,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 
   function initAccount() {
     if (!window.Clerk) { setTimeout(initAccount, 300); return; }
-    Clerk.load().then(function () {
+    Clerk.load({ localization: CLERK_ES }).then(function () {
       if (Clerk.user) {
         updateAccountUI(true);
         loadProfilesFromServer();
