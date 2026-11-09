@@ -3226,8 +3226,22 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
         subtitle: 'Bienvenido a Semáforo de Clase',
         actionText: '¿Ya tienes cuenta?',
         actionLink: 'Inicia sesión'
+      },
+      emailCode: {
+        title: 'Verifica tu correo',
+        subtitle: 'Ingresa el código que te enviamos',
+        formTitle: 'Código de verificación',
+        formSubtitle: 'Revisa tu correo y pega aquí el código de 6 dígitos',
+        resendButton: 'Reenviar código'
+      },
+      continue: {
+        title: 'Completa tu información',
+        actionText: '¿Ya tienes cuenta?',
+        actionLink: 'Inicia sesión'
       }
     },
+    formFieldInputPlaceholder__firstName: 'Tu nombre',
+    formFieldInputPlaceholder__lastName: 'Tu apellido',
     userButton: { action__signOut: 'Cerrar sesión' }
   };
   /* Monta el formulario de Clerk en el contenedor de bienvenida, según la
@@ -3237,9 +3251,17 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     document.querySelectorAll('.ob-tab').forEach(function (b) {
       b.setAttribute('aria-selected', String(b.getAttribute('data-ob-tab') === mode));
     });
-    $('obClerk').innerHTML = '';
+    unmountClerk($('obClerk'));
     if (mode === 'signin') Clerk.mountSignIn($('obClerk'), { appearance: CLERK_APPEARANCE });
     else Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
+  }
+  /* Quita correctamente un formulario de Clerk antes de montar otro en el mismo
+     lugar; limpiar el HTML a mano puede dejar el formulario roto después. */
+  function unmountClerk(node) {
+    if (window.Clerk && typeof Clerk.unmountComponent === 'function') {
+      try { Clerk.unmountComponent(node); } catch (e) {}
+    }
+    node.innerHTML = '';
   }
   document.querySelectorAll('.ob-tab').forEach(function (b) {
     b.addEventListener('click', function () { mountObWidget(b.getAttribute('data-ob-tab')); });
@@ -3263,7 +3285,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     $('onboarding').hidden = true;
   }
   function obAdvanceToStep2() {
-    $('obClerk').innerHTML = '';
+    unmountClerk($('obClerk'));
     $('obStep1').hidden = true;
     $('obStep2').hidden = false;
     if (activeProf && activeProf.name && activeProf.name !== 'Mi semáforo' && activeProf.name !== 'Semáforo de la clase') {
@@ -3300,7 +3322,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
         var signedIn = !!(payload && payload.user);
         updateAccountUI(signedIn);
         if (signedIn) {
-          $('clerkSignIn').innerHTML = '';
+          unmountClerk($('clerkSignIn'));
           loadProfilesFromServer();
           if (onboardingShown && !$('obStep1').hidden) obAdvanceToStep2();
         } else {
