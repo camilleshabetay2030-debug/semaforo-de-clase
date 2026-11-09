@@ -604,24 +604,33 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 
 /* ---------- Bienvenida / cuenta de profesor ---------- */
 .onboarding {
-  position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
-  padding: 24px; overflow-y: auto;
+  position: fixed; inset: 0; z-index: 200; display: flex; justify-content: center;
+  padding: max(24px, env(safe-area-inset-top, 0px)) 16px 24px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
   background: radial-gradient(1100px 600px at 15% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),
     radial-gradient(900px 500px at 100% 10%, color-mix(in srgb, var(--go) 14%, transparent), transparent 55%), var(--bg);
 }
 .onboarding-card {
   width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 36px 32px; box-shadow: var(--shadow); text-align: center;
+  margin: auto 0; min-height: min-content;
 }
 .onboarding-logo { border-radius: 18px; margin-bottom: 14px; }
-.onboarding-card h1 { font-size: 1.5rem; }
+.onboarding-card h1 { font-size: clamp(1.25rem, 1.05rem + .8vw, 1.5rem); }
 .onboarding-card .lead { font-size: 1rem; margin: 10px 0 18px; max-width: none; }
 .onboarding-card .lbl { text-align: left; }
 .onboarding-card input { text-align: left; }
 .onboarding-card .btn.wide { width: 100%; margin-top: 18px; }
 .onboarding-card .text-link { margin-top: 16px; display: inline-flex; align-items: center; gap: 6px; }
 .onboarding-card .text-link svg { width: 15px; height: 15px; }
-#obClerk { margin: 4px 0; }
+#obClerk { margin: 4px 0; max-width: 100%; overflow: hidden; }
+#obClerk .cl-rootBox, #obClerk .cl-card { width: 100% !important; max-width: 100% !important; }
+@media (max-width: 480px) {
+  .onboarding { padding-left: 10px; padding-right: 10px; }
+  .onboarding-card { padding: 26px 18px; border-radius: var(--radius-sm); }
+  .onboarding-card h1 { font-size: 1.2rem; }
+  .onboarding-card .lead { font-size: .92rem; }
+}
 
 /* ---------- Panel del profesor ---------- */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
