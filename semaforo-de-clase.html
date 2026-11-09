@@ -1877,11 +1877,33 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 (function (root) {
   'use strict';
 
-  function frameDb(buf) {
-    var sum = 0;
-    for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
-    var rms = Math.sqrt(sum / buf.length);
-    return 20 * Math.log10(Math.max(rms, 1e-7));
+  /* Pesos por frecuencia: dan más peso a la voz humana (~300 Hz–4 kHz, como
+     hacen los sonómetros reales) y menos a graves de motores/aire acondicionado
+     o a agudos de siseo, para que el volumen medido se parezca más a lo que
+     realmente molesta en un salón. */
+  function voiceWeights(fftSize, sampleRate) {
+    var n = fftSize / 2;
+    var w = new Float32Array(n);
+    for (var i = 0; i < n; i++) {
+      var f = i * sampleRate / fftSize;
+      var low = 1 / (1 + Math.pow(300 / Math.max(f, 1), 2));
+      var high = 1 / (1 + Math.pow(f / 4000, 2));
+      w[i] = low * high;
+    }
+    return w;
+  }
+
+  /* dB ponderado de un espectro: pasa cada bin a potencia antes de promediar
+     (promediar decibeles directamente no es correcto) y vuelve a convertir a dB. */
+  function weightedDb(freqData, weights) {
+    var num = 0, den = 0;
+    for (var i = 0; i < freqData.length; i++) {
+      var p = Math.pow(10, freqData[i] / 10);
+      num += p * weights[i];
+      den += weights[i];
+    }
+    var avgPower = den > 0 ? num / den : 1e-12;
+    return 10 * Math.log10(Math.max(avgPower, 1e-12));
   }
 
   function median(arr) {
@@ -1916,14 +1938,17 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       try { if (self.ctx.state === 'suspended') self.ctx.resume(); } catch (e) {}
       var src = self.ctx.createMediaStreamSource(stream);
       var analyser = self.ctx.createAnalyser();
-      analyser.fftSize = 1024;            // ventana corta: lecturas más frecuentes y sensibles
-      analyser.smoothingTimeConstant = 0; // el suavizado lo controla este motor, no el navegador
+      analyser.fftSize = 1024;             // ventana corta: lecturas más frecuentes y sensibles
+      analyser.smoothingTimeConstant = 0;  // el suavizado lo controla este motor, no el navegador
+      analyser.minDecibels = -100;
+      analyser.maxDecibels = 0;            // evita que la voz fuerte se "recorte" en el espectro
       src.connect(analyser);
       self.analyser = analyser;
       self.history = [];
       self.floor = -90; self.attack = -90;
 
-      var buf = new Float32Array(analyser.fftSize);
+      var freqData = new Float32Array(analyser.frequencyBinCount);
+      var weights = voiceWeights(analyser.fftSize, self.ctx.sampleRate);
       var calibSamples = [];
       var calibStart = performance.now();
       var CALIB_MS = 500; // medio segundo de silencio inicial para calibrar el salón
@@ -1934,8 +1959,8 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
         // el navegador puede "dormir" el AudioContext por ahorro de energía si pasa
         // un rato sin interacción; si eso pasa, se reactiva solo en el siguiente cuadro.
         if (self.ctx.state === 'suspended') { try { self.ctx.resume().catch(function () {}); } catch (e) {} }
-        analyser.getFloatTimeDomainData(buf);
-        var db = frameDb(buf);
+        analyser.getFloatFrequencyData(freqData);
+        var db = weightedDb(freqData, weights);
         var now = performance.now();
 
         if (now - calibStart < CALIB_MS) {
