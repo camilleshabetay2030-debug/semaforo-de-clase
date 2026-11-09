@@ -225,7 +225,7 @@ svg:not(.donut):not(.vchart) { fill: none; stroke: currentColor; stroke-width: 1
 .export-box p { margin: 0 0 6px; font-size: .9rem; color: var(--muted); }
 .export-box textarea { width: 100%; font-family: var(--font-mono); font-size: .8rem; }
 
-input[type="text"], input[type="url"], input[type="number"], select, textarea {
+input[type="text"], input[type="url"], input[type="number"], input[type="password"], select, textarea {
   width: 100%; font: inherit; color: var(--fg); background: var(--surface);
   border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 9px 11px; min-height: 42px;
 }
@@ -626,8 +626,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 .ob-tabs { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 3px; gap: 3px; margin-bottom: 10px; }
 .ob-tab { font: inherit; font-weight: 700; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 8px 18px; border-radius: var(--radius-pill); cursor: pointer; }
 .ob-tab[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
-#obClerk { margin: 4px 0; max-width: 100%; overflow: hidden; }
-#obClerk .cl-rootBox, #obClerk .cl-card { width: 100% !important; max-width: 100% !important; }
+#obAuthForm { text-align: left; }
 @media (max-width: 480px) {
   .onboarding { padding-left: 10px; padding-right: 10px; }
   .onboarding-card { padding: 26px 18px; border-radius: var(--radius-sm); }
@@ -704,13 +703,6 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Semáforo">
-<script
-  async
-  crossorigin="anonymous"
-  data-clerk-publishable-key="pk_test_bGVhZGluZy1yYXB0b3ItNjA2Ny5jbGVyay5hY2NvdW50cy5kZXYk"
-  src="https://leading-raptor-6067.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
-  type="text/javascript"
-></script>
 </head>
 <body>
 
@@ -763,7 +755,14 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
         <button type="button" class="ob-tab" data-ob-tab="signup" role="tab" aria-selected="true">Registrarse</button>
         <button type="button" class="ob-tab" data-ob-tab="signin" role="tab" aria-selected="false">Iniciar sesión</button>
       </div>
-      <div id="obClerk"></div>
+      <form id="obAuthForm" novalidate>
+        <label for="obName" class="lbl">Tu nombre</label>
+        <input id="obName" type="text" maxlength="60" autocomplete="name" placeholder="Ej.: Prof. Gómez" required>
+        <label for="obPassword" class="lbl">Contraseña</label>
+        <input id="obPassword" type="password" maxlength="100" autocomplete="current-password" placeholder="Al menos 4 caracteres" required>
+        <div class="alert" id="obAuthAlert" role="alert" hidden></div>
+        <button class="btn btn-primary wide" type="submit" id="btnObAuth">Registrarse</button>
+      </form>
       <button class="text-link" id="btnSkipAccount">Continuar sin cuenta en esta laptop<svg><use href="#i-arrow"/></svg></button>
     </div>
     <div id="obStep2" hidden>
@@ -1135,7 +1134,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       <div id="accountSignedOut">
         <h2 class="h-sm">Mi cuenta</h2>
         <p class="hint">Inicia sesión para que tus semáforos se guarden en tu cuenta y no se mezclen con los de otros profesores que usen la misma laptop.</p>
-        <div id="clerkSignIn"></div>
+        <button class="btn btn-primary" id="btnOpenAccount"><svg><use href="#i-check"/></svg>Iniciar sesión o crear cuenta</button>
       </div>
       <div id="accountSignedIn" hidden>
         <div class="account-row">
@@ -3135,137 +3134,43 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 
   function initTeacher() { loadProfiles(); applyProfile(); renderTeacher(); }
 
-  /* ================= Cuenta de profesor (Clerk) ================= */
+  /* ================= Cuenta de profesor (propia: nombre y contraseña) ================= */
+  var AUTH_KEY = 'sdc.auth';
+  var currentUser = null; // { name, token }
+
   function syncProfilesToServer() {
-    if (!window.Clerk || !Clerk.session) return;
-    Clerk.session.getToken().then(function (token) {
-      if (!token) return;
-      fetch('/api/profiles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ profiles: profiles, activeId: activeProf.id })
-      }).catch(function () {});
+    if (!currentUser) return;
+    fetch('/api/profiles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentUser.token },
+      body: JSON.stringify({ profiles: profiles, activeId: activeProf.id })
     }).catch(function () {});
   }
 
   function loadProfilesFromServer() {
-    if (!window.Clerk || !Clerk.session) return;
-    Clerk.session.getToken().then(function (token) {
-      if (!token) return;
-      fetch('/api/profiles', { headers: { 'Authorization': 'Bearer ' + token } })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (data) {
-          if (data && Array.isArray(data.profiles) && data.profiles.length) {
-            profiles = data.profiles.map(function (p) { return P.normalize(p, true); });
-            activeProf = profiles.filter(function (p) { return p.id === data.activeId; })[0] || profiles[0];
-            applyProfile(); renderTeacher(); renderLiveSelect();
-          } else {
-            // cuenta nueva sin datos guardados todavía: sube lo que ya hay en esta laptop
-            syncProfilesToServer();
-          }
-        }).catch(function () {});
-    }).catch(function () {});
+    if (!currentUser) return;
+    fetch('/api/profiles', { headers: { 'Authorization': 'Bearer ' + currentUser.token } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data && Array.isArray(data.profiles) && data.profiles.length) {
+          profiles = data.profiles.map(function (p) { return P.normalize(p, true); });
+          activeProf = profiles.filter(function (p) { return p.id === data.activeId; })[0] || profiles[0];
+          applyProfile(); renderTeacher(); renderLiveSelect();
+        } else {
+          // cuenta nueva sin datos guardados todavía: sube lo que ya hay en esta laptop
+          syncProfilesToServer();
+        }
+      }).catch(function () {});
   }
 
   function updateAccountUI(signedIn) {
     $('accountSignedOut').hidden = !!signedIn;
     $('accountSignedIn').hidden = !signedIn;
-    if (signedIn && window.Clerk && Clerk.user) {
-      var email = (Clerk.user.primaryEmailAddress && Clerk.user.primaryEmailAddress.emailAddress) || Clerk.user.username || 'tu cuenta';
-      $('accountStatus').textContent = 'Sesión iniciada como ' + email;
+    if (signedIn && currentUser) {
+      $('accountStatus').textContent = 'Sesión iniciada como ' + currentUser.name;
     }
   }
 
-  var CLERK_APPEARANCE = {
-    variables: {
-      colorPrimary: '#6c5ce7',
-      colorBackground: '#ffffff',
-      colorText: '#1e1733',
-      colorTextSecondary: '#6f6886',
-      colorDanger: '#b8322a',
-      colorSuccess: '#1d8a4e',
-      colorInputBackground: '#f3effd',
-      colorInputText: '#1e1733',
-      borderRadius: '14px',
-      fontFamily: '"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif'
-    },
-    elements: {
-      card: { boxShadow: 'none', border: '1px solid #e7e1fb' },
-      formButtonPrimary: { borderRadius: '999px' },
-      socialButtonsBlockButton: { borderRadius: '999px' }
-    }
-  };
-  /* Traducción al español del formulario de Clerk (solo las cadenas más visibles;
-     lo que no se traduce aquí sigue mostrándose en el idioma por defecto). */
-  var CLERK_ES = {
-    locale: 'es-ES',
-    dividerText: 'o',
-    formFieldLabel__emailAddress: 'Correo electrónico',
-    formFieldLabel__password: 'Contraseña',
-    formFieldLabel__firstName: 'Nombre',
-    formFieldLabel__lastName: 'Apellido',
-    formFieldLabel__username: 'Usuario',
-    formFieldInputPlaceholder__emailAddress: 'tu@correo.com',
-    formFieldInputPlaceholder__password: 'Tu contraseña',
-    formButtonPrimary: 'Continuar',
-    formFieldAction__forgotPassword: 'Olvidé mi contraseña',
-    footerActionLink__useAnotherMethod: 'Usar otro método',
-    signIn: {
-      start: {
-        title: 'Iniciar sesión',
-        subtitle: 'Bienvenido de nuevo a Semáforo de Clase',
-        actionText: '¿No tienes cuenta?',
-        actionLink: 'Regístrate'
-      },
-      password: { title: 'Ingresa tu contraseña', actionLink: 'Usar otro método' },
-      forgotPasswordAlternativeMethods: { title: 'Olvidé mi contraseña' }
-    },
-    signUp: {
-      start: {
-        title: 'Crear una cuenta',
-        subtitle: 'Bienvenido a Semáforo de Clase',
-        actionText: '¿Ya tienes cuenta?',
-        actionLink: 'Inicia sesión'
-      },
-      emailCode: {
-        title: 'Verifica tu correo',
-        subtitle: 'Ingresa el código que te enviamos',
-        formTitle: 'Código de verificación',
-        formSubtitle: 'Revisa tu correo y pega aquí el código de 6 dígitos',
-        resendButton: 'Reenviar código'
-      },
-      continue: {
-        title: 'Completa tu información',
-        actionText: '¿Ya tienes cuenta?',
-        actionLink: 'Inicia sesión'
-      }
-    },
-    formFieldInputPlaceholder__firstName: 'Tu nombre',
-    formFieldInputPlaceholder__lastName: 'Tu apellido',
-    userButton: { action__signOut: 'Cerrar sesión' }
-  };
-  /* Monta el formulario de Clerk en el contenedor de bienvenida, según la
-     pestaña elegida: Registrarse o Iniciar sesión. */
-  function mountObWidget(mode) {
-    if (!window.Clerk) return;
-    document.querySelectorAll('.ob-tab').forEach(function (b) {
-      b.setAttribute('aria-selected', String(b.getAttribute('data-ob-tab') === mode));
-    });
-    unmountClerk($('obClerk'));
-    if (mode === 'signin') Clerk.mountSignIn($('obClerk'), { appearance: CLERK_APPEARANCE });
-    else Clerk.mountSignUp($('obClerk'), { appearance: CLERK_APPEARANCE });
-  }
-  /* Quita correctamente un formulario de Clerk antes de montar otro en el mismo
-     lugar; limpiar el HTML a mano puede dejar el formulario roto después. */
-  function unmountClerk(node) {
-    if (window.Clerk && typeof Clerk.unmountComponent === 'function') {
-      try { Clerk.unmountComponent(node); } catch (e) {}
-    }
-    node.innerHTML = '';
-  }
-  document.querySelectorAll('.ob-tab').forEach(function (b) {
-    b.addEventListener('click', function () { mountObWidget(b.getAttribute('data-ob-tab')); });
-  });
   /* ---------- Bienvenida: cuenta primero, luego los datos de la clase ----------
      Se muestra cada vez que nadie tiene la sesión abierta en esta pestaña,
      incluida la primera carga y justo después de que alguien cierre sesión,
@@ -3273,19 +3178,34 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
      cuenta» solo la oculta por esta sesión del navegador, no para siempre. */
   var onboardingShown = false;
   var skippedThisSession = false;
+  var obMode = 'signup';
+
+  function setObMode(mode) {
+    obMode = mode;
+    document.querySelectorAll('.ob-tab').forEach(function (b) {
+      b.setAttribute('aria-selected', String(b.getAttribute('data-ob-tab') === mode));
+    });
+    $('btnObAuth').textContent = mode === 'signin' ? 'Iniciar sesión' : 'Registrarse';
+    $('obPassword').setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
+    setAlert($('obAuthAlert'), null);
+  }
+  document.querySelectorAll('.ob-tab').forEach(function (b) {
+    b.addEventListener('click', function () { setObMode(b.getAttribute('data-ob-tab')); });
+  });
+
   function showOnboarding() {
     onboardingShown = true;
     $('onboarding').hidden = false;
     $('obStep1').hidden = false;
     $('obStep2').hidden = true;
-    mountObWidget('signup');
+    $('obName').value = ''; $('obPassword').value = '';
+    setObMode('signup');
   }
   function hideOnboarding() {
     onboardingShown = false;
     $('onboarding').hidden = true;
   }
   function obAdvanceToStep2() {
-    unmountClerk($('obClerk'));
     $('obStep1').hidden = true;
     $('obStep2').hidden = false;
     if (activeProf && activeProf.name && activeProf.name !== 'Mi semáforo' && activeProf.name !== 'Semáforo de la clase') {
@@ -3307,34 +3227,65 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
     location.hash = '#semaforo';
   });
 
-  function initAccount() {
-    if (!window.Clerk) { setTimeout(initAccount, 300); return; }
-    Clerk.load({ localization: CLERK_ES }).then(function () {
-      if (Clerk.user) {
-        updateAccountUI(true);
-        loadProfilesFromServer();
-      } else {
-        updateAccountUI(false);
-        Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
-        if (!skippedThisSession) showOnboarding();
-      }
-      Clerk.addListener(function (payload) {
-        var signedIn = !!(payload && payload.user);
-        updateAccountUI(signedIn);
-        if (signedIn) {
-          unmountClerk($('clerkSignIn'));
-          loadProfilesFromServer();
-          if (onboardingShown && !$('obStep1').hidden) obAdvanceToStep2();
-        } else {
-          if (!$('clerkSignIn').hasChildNodes()) Clerk.mountSignIn($('clerkSignIn'), { appearance: CLERK_APPEARANCE });
-          // alguien cerró sesión: invitar al siguiente profesor a entrar con la suya
-          skippedThisSession = false;
-          if (!onboardingShown) showOnboarding();
-        }
-      });
-    }).catch(function () {});
+  function doAuth(name, password, mode) {
+    return fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: mode, name: name, password: password })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (data) { return { ok: r.ok, data: data }; });
+    });
   }
-  $('btnAccountSignOut').addEventListener('click', function () { if (window.Clerk) Clerk.signOut(); });
+
+  $('obAuthForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('obName').value.trim();
+    var password = $('obPassword').value;
+    setAlert($('obAuthAlert'), null);
+    if (!name || !password) { setAlert($('obAuthAlert'), 'Escribe tu nombre y tu contraseña.', 'error'); return; }
+    $('btnObAuth').disabled = true;
+    doAuth(name, password, obMode).then(function (res) {
+      if (!res.ok) { setAlert($('obAuthAlert'), (res.data && res.data.error) || 'No se pudo completar. Intenta de nuevo.', 'error'); return; }
+      currentUser = { name: res.data.name, token: res.data.token };
+      store.set(AUTH_KEY, currentUser);
+      updateAccountUI(true);
+      loadProfilesFromServer();
+      if (onboardingShown && !$('obStep1').hidden) obAdvanceToStep2();
+    }).catch(function () {
+      setAlert($('obAuthAlert'), 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.', 'error');
+    }).then(function () {
+      $('btnObAuth').disabled = false;
+    });
+  });
+
+  $('btnOpenAccount').addEventListener('click', function () { showOnboarding(); });
+
+  $('btnAccountSignOut').addEventListener('click', function () {
+    var token = currentUser && currentUser.token;
+    currentUser = null;
+    store.del(AUTH_KEY);
+    updateAccountUI(false);
+    skippedThisSession = false;
+    if (!onboardingShown) showOnboarding();
+    if (token) {
+      fetch('/api/auth', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout', token: token })
+      }).catch(function () {});
+    }
+  });
+
+  function initAccount() {
+    currentUser = store.get(AUTH_KEY, null);
+    if (currentUser && currentUser.token) {
+      updateAccountUI(true);
+      loadProfilesFromServer();
+    } else {
+      currentUser = null;
+      updateAccountUI(false);
+      if (!skippedThisSession) showOnboarding();
+    }
+  }
 
   /* ================= Inicio ================= */
   function init() {

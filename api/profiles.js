@@ -1,22 +1,4 @@
-const { verifyToken } = require('@clerk/backend');
-const { Redis } = require('@upstash/redis');
-
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
-});
-
-async function getUserId(req) {
-  const auth = req.headers['authorization'] || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-  if (!token) return null;
-  try {
-    const claims = await verifyToken(token, { secretKey: process.env.CLERK_SECRET_KEY });
-    return claims.sub || null;
-  } catch (e) {
-    return null;
-  }
-}
+const { redis, getUserId } = require('./_redis');
 
 module.exports = async function handler(req, res) {
   const userId = await getUserId(req);
