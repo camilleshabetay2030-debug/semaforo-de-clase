@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EDE8FE"/>
+      <stop offset="1" stop-color="#DCE6FF"/>
+    </linearGradient>
+    <linearGradient id="housing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2B2440"/>
+      <stop offset="1" stop-color="#171229"/>
+    </linearGradient>
+    <radialGradient id="r" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#FF9B8F"/>
+      <stop offset="1" stop-color="#E8463A"/>
+    </radialGradient>
+    <radialGradient id="y" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#FFE08A"/>
+      <stop offset="1" stop-color="#F2B51D"/>
+    </radialGradient>
+    <radialGradient id="g" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#8CF0B3"/>
+      <stop offset="1" stop-color="#2FC46F"/>
+    </radialGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#2B2440" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect x="4" y="4" width="248" height="248" rx="64" fill="url(#bg)"/>
+
+  <g filter="url(#soft)">
+    <rect x="84" y="40" width="88" height="176" rx="44" fill="url(#housing)"/>
+  </g>
+  <rect x="84" y="40" width="88" height="40" rx="44" fill="#ffffff" opacity="0.06"/>
+
+  <circle cx="128" cy="84" r="20" fill="url(#r)"/>
+  <circle cx="121" cy="77" r="6" fill="#ffffff" opacity="0.55"/>
+
+  <circle cx="128" cy="128" r="20" fill="url(#y)"/>
+  <circle cx="121" cy="121" r="6" fill="#ffffff" opacity="0.55"/>
+
+  <circle cx="128" cy="172" r="20" fill="url(#g)"/>
+  <circle cx="121" cy="165" r="6" fill="#ffffff" opacity="0.55"/>
+
+  <path d="M48 128 a80 80 0 0 1 20 -54" fill="none" stroke="#8B7CF6" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+  <path d="M208 128 a80 80 0 0 0 -20 -54" fill="none" stroke="#6C8CF5" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+</svg>

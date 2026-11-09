@@ -16,55 +16,59 @@
    Barra lateral fija en escritorio; menú desplegable en móvil.
    ============================================================ */
 :root {
-  /* Neutros con ligero tono azul pizarra */
-  --bg: #f3f5f8;
+  /* Neutros con tono lila/lavanda, estilo app educativa */
+  --bg: #f4f1fd;
   --surface: #ffffff;
-  --surface-2: #eef1f5;
-  --fg: #141b24;
-  --muted: #566170;
-  --line: #d9dfe7;
-  --line-strong: #b9c2ce;
-  /* Acento: tinta azul de marcador */
-  --accent: #2443a8;
+  --surface-2: #f3effd;
+  --fg: #1e1733;
+  --muted: #6f6886;
+  --line: #e7e1fb;
+  --line-strong: #d3c7f7;
+  /* Acento: violeta vivo; los botones principales usan --ink (casi negro) */
+  --accent: #6c5ce7;
   --accent-ink: #ffffff;
-  --accent-soft: #e4e9f8;
-  --bar-muted: #a7b1bf;
+  --accent-soft: #ece6fe;
+  --bar-muted: #c9c0ed;
+  --ink: #1b1530;
   /* Semáforo (semánticos, no son el acento) */
-  --go: #1d8a4e;      --go-soft: #e1f3e8;   --go-lamp: #2fc46f;
-  --warn: #9a6a00;    --warn-soft: #fbf0d3; --warn-lamp: #f2b51d;
-  --stop: #b8322a;    --stop-soft: #f9e2df; --stop-lamp: #ec4a3f;
-  --housing: #1a222c;
+  --go: #1d8a4e;      --go-soft: #e1f6e9;   --go-lamp: #2fc46f;
+  --warn: #9a6a00;    --warn-soft: #fdf1d6; --warn-lamp: #f2b51d;
+  --stop: #b8322a;    --stop-soft: #fbe3e8; --stop-lamp: #ec4a3f;
+  --housing: #201a38;
   /* Paleta categórica de la encuesta */
-  --c1: #2443a8; --c2: #8a5a9e; --c3: #2f8a8a; --c4: #b07a3a; --c5: #6b7fa6;
+  --c1: #6c5ce7; --c2: #e8699b; --c3: #2fb8a6; --c4: #f2a93b; --c5: #6c8cf5;
 
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
 
-  --radius: 10px;
-  --radius-sm: 7px;
-  --shadow: 0 1px 2px rgb(20 27 36 / .06), 0 4px 16px rgb(20 27 36 / .05);
+  --radius: 22px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --shadow: 0 2px 10px rgb(108 92 231 / .08), 0 16px 34px rgb(108 92 231 / .12);
   --side-w: 264px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #10151c; --surface: #171e27; --surface-2: #1d2531; --fg: #e8edf3; --muted: #9aa6b5;
-    --line: #2a3442; --line-strong: #3a4656;
-    --accent: #7b96ef; --accent-ink: #0d1424; --accent-soft: #1f2a48; --bar-muted: #4c5868;
+    --bg: #15101f; --surface: #1d1730; --surface-2: #241c3a; --fg: #ece8fb; --muted: #a79fc4;
+    --line: #342a52; --line-strong: #473a6b;
+    --accent: #a89cff; --accent-ink: #15101f; --accent-soft: #2c2350; --bar-muted: #4c4268;
+    --ink: #a89cff;
     --go: #4cc985; --go-soft: #15301f; --warn: #f0c04b; --warn-soft: #33290f; --stop: #f07a70; --stop-soft: #3a1a18;
-    --housing: #0a0e13;
-    --c1: #7b96ef; --c2: #c193d4; --c3: #5cc2c2; --c4: #e0a868; --c5: #9fb0d4;
-    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 4px 16px rgb(0 0 0 / .25);
+    --housing: #0d0a17;
+    --c1: #a89cff; --c2: #e38fb6; --c3: #5cd6c2; --c4: #e8ba6e; --c5: #8fa6f5;
+    --shadow: 0 2px 10px rgb(0 0 0 / .35), 0 16px 34px rgb(0 0 0 / .3);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #10151c; --surface: #171e27; --surface-2: #1d2531; --fg: #e8edf3; --muted: #9aa6b5;
-  --line: #2a3442; --line-strong: #3a4656;
-  --accent: #7b96ef; --accent-ink: #0d1424; --accent-soft: #1f2a48; --bar-muted: #4c5868;
+  --bg: #15101f; --surface: #1d1730; --surface-2: #241c3a; --fg: #ece8fb; --muted: #a79fc4;
+  --line: #342a52; --line-strong: #473a6b;
+  --accent: #a89cff; --accent-ink: #15101f; --accent-soft: #2c2350; --bar-muted: #4c4268;
+  --ink: #a89cff;
   --go: #4cc985; --go-soft: #15301f; --warn: #f0c04b; --warn-soft: #33290f; --stop: #f07a70; --stop-soft: #3a1a18;
-  --housing: #0a0e13;
-  --c1: #7b96ef; --c2: #c193d4; --c3: #5cc2c2; --c4: #e0a868; --c5: #9fb0d4;
+  --housing: #0d0a17;
+  --c1: #a89cff; --c2: #e38fb6; --c3: #5cd6c2; --c4: #e8ba6e; --c5: #8fa6f5;
   --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 4px 16px rgb(0 0 0 / .25);
   color-scheme: dark;
 }
@@ -72,7 +76,11 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0; background: var(--bg); color: var(--fg);
+  margin: 0; color: var(--fg);
+  background: var(--bg);
+  background-image: radial-gradient(1100px 560px at 12% -8%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--go) 10%, transparent), transparent 55%);
+  background-attachment: fixed;
   font-family: var(--font-body); font-size: 16.5px; line-height: 1.55;
 }
 img, svg { max-width: 100%; }
@@ -123,11 +131,7 @@ main {
   outline: none;
 }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 6px; }
-.brand-mark { width: 22px; height: 46px; background: var(--housing); border-radius: 7px; display: grid; gap: 3px; padding: 5px 4px; flex: none; }
-.brand-mark span { border-radius: 50%; }
-.brand-mark span:nth-child(1) { background: var(--stop-lamp); }
-.brand-mark span:nth-child(2) { background: var(--warn-lamp); }
-.brand-mark span:nth-child(3) { background: var(--go-lamp); }
+.brand-mark { width: 40px; height: 40px; border-radius: 12px; flex: none; }
 .brand-name { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; letter-spacing: -.01em; }
 .brand-tag { font-size: .8rem; color: var(--muted); }
 
@@ -161,7 +165,7 @@ svg:not(.donut):not(.vchart) { fill: none; stroke: currentColor; stroke-width: 1
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   font: inherit; font-weight: 700; font-size: .95rem; line-height: 1.2;
-  padding: 10px 16px; min-height: 42px; border-radius: var(--radius-sm);
+  padding: 10px 18px; min-height: 44px; border-radius: var(--radius-pill);
   border: 1px solid var(--line-strong); background: var(--surface); color: var(--fg);
   cursor: pointer; text-decoration: none; transition: background .15s, border-color .15s, transform .1s;
 }
@@ -169,8 +173,8 @@ svg:not(.donut):not(.vchart) { fill: none; stroke: currentColor; stroke-width: 1
 .btn:hover { background: var(--surface-2); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+.btn-primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn-primary:hover { background: var(--ink); filter: brightness(1.2); }
 .btn-go { background: var(--go); border-color: var(--go); color: #fff; }
 .btn-go:hover { background: var(--go); filter: brightness(1.08); }
 .btn-stop { background: var(--stop); border-color: var(--stop); color: #fff; }
@@ -256,10 +260,11 @@ input:focus, select:focus, textarea:focus { outline: 3px solid var(--accent-soft
 .tl-hero .lamp { width: 84px; height: 84px; }
 .home-grid { display: grid; grid-template-columns: minmax(0, 420px); gap: 14px; }
 .home-card {
-  display: flex; flex-direction: column; gap: 6px; padding: 20px; border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--line); color: var(--fg); text-decoration: none; transition: border-color .15s, transform .15s;
+  display: flex; flex-direction: column; gap: 6px; padding: 22px; border-radius: var(--radius);
+  background: linear-gradient(145deg, var(--accent-soft), var(--surface) 70%);
+  border: 1px solid var(--line); color: var(--fg); text-decoration: none; transition: border-color .15s, transform .15s, box-shadow .15s;
 }
-.home-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.home-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow); }
 .big-num { font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .big-num small { font-size: .5em; font-weight: 700; color: var(--muted); margin-left: 2px; }
 .flow-strip { display: flex; flex-direction: column; gap: 12px; }
@@ -273,7 +278,7 @@ input:focus, select:focus, textarea:focus { outline: 3px solid var(--accent-soft
 .block-index { display: flex; flex-wrap: wrap; gap: 8px; }
 .block-index a { font-size: .88rem; font-weight: 700; text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--fg); background: var(--surface); }
 .block-index a:hover { border-color: var(--accent); color: var(--accent); }
-.block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 80px; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 80px; }
 .block-label { color: var(--accent); }
 .split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
 .split-c { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
@@ -318,14 +323,14 @@ input:focus, select:focus, textarea:focus { outline: 3px solid var(--accent-soft
 .privacy-strip div:nth-child(n+4) svg { color: var(--go); }
 
 /* ---------- Semáforo en vivo ---------- */
-.mode-switch { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 3px; flex-wrap: wrap; }
-.mode-switch button { font: inherit; font-weight: 700; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 8px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+.mode-switch { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 3px; gap: 3px; flex-wrap: wrap; }
+.mode-switch button { font: inherit; font-weight: 700; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 8px 14px; border-radius: var(--radius-pill); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
 .mode-switch button svg { width: 17px; height: 17px; }
 .mode-switch button[aria-checked="true"] { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
 .demo-banner { display: flex; gap: 12px; padding: 14px 16px; border-radius: var(--radius); background: var(--warn-soft); border: 1px solid var(--warn); }
 .demo-banner svg { width: 22px; height: 22px; color: var(--warn); flex: none; }
 .live { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 20px; align-items: start; }
-.live-main { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 28px; min-width: 0; }
+.live-main { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; min-width: 0; }
 .live-light-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 32px; align-items: center; }
 .tl-live .lamp { width: 96px; height: 96px; }
 .live-msg { padding: 22px; border-radius: var(--radius); background: var(--surface-2); transition: background .35s; min-width: 0; }
@@ -658,7 +663,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 }
 
 </style>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='9' y='1' width='14' height='30' rx='5' fill='%2316202c'/%3E%3Ccircle cx='16' cy='8' r='3.6' fill='%23d6453c'/%3E%3Ccircle cx='16' cy='16' r='3.6' fill='%23e8b021'/%3E%3Ccircle cx='16' cy='24' r='3.6' fill='%2328a35c'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <script
   async
   crossorigin="anonymous"
@@ -711,7 +716,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
   <!-- ================= Barra lateral ================= -->
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <img class="brand-mark" src="assets/logo.svg" alt="" aria-hidden="true" width="40" height="40">
       <div>
         <div class="brand-name">Semáforo de Clase</div>
         <div class="brand-tag">Menos ruido, más aprendizaje</div>
