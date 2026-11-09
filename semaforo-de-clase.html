@@ -1314,7 +1314,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       <dl class="kv" id="storageSummary"></dl>
       <button class="btn btn-ghost danger" id="btnWipeAll"><svg><use href="#i-trash"/></svg>Borrar todos los datos locales</button>
       <div class="confirm-bar" id="wipeConfirm" hidden>
-        <span>¿Borrar pruebas, datos de impacto y configuración guardados en este navegador?</span>
+        <span>¿Borrar los ajustes de actividades y la sensibilidad guardados en este navegador?</span>
         <button class="btn btn-stop" id="btnWipeYes">Sí, borrar todo</button>
         <button class="btn btn-ghost" id="btnWipeNo">Cancelar</button>
       </div>
@@ -1821,14 +1821,13 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
       body:
         P('<b>Desarrollo y pruebas del prototipo.</b> Para desarrollar nuestra aplicación, construimos el motor que mide el volumen del micrófono y lo compara con el silencio calibrado al iniciar, y lo conectamos con una interfaz que muestra los colores del semáforo. Cuando tuvimos un prototipo funcional, realizamos pruebas con tres situaciones: salón tranquilo (esperamos que aparezca verde), conversaciones moderadas (amarillo) y ruido excesivo (rojo). Comprobamos si el semáforo reconoce correctamente cada situación y realizamos ajustes cuando fue necesario. Luego, con autorización de la escuela, planeamos evaluar el proyecto durante dos semanas en 8.º C, comparando una semana sin la aplicación y otra utilizando el Semáforo de Clase.') +
         P('<b>Implementación en el salón.</b> Para implementar el «Semáforo de Clase», necesitamos una laptop con micrófono y acceso a la aplicación. El profesor abrirá el programa, activará el micrófono y explicará a los estudiantes el significado de los colores. Durante las clases, los estudiantes observarán el semáforo y tratarán de controlar el ruido cuando aparezcan las señales amarilla o roja. Antes de utilizar la aplicación, realizaremos una pequeña demostración para explicar su funcionamiento.') +
-        P('<b>Evaluación de la precisión del semáforo.</b> Para comprobar si nuestro semáforo funciona correctamente, realizamos 30 pruebas con sonidos producidos a propósito para cada categoría: 10 con un ambiente tranquilo (verde), 10 con conversaciones moderadas (amarillo) y 10 con ruido excesivo (rojo). En cada prueba observamos si la aplicación muestra el color correcto y registramos los aciertos y errores, calculando el porcentaje de aciertos con la fórmula: Precisión general = (Número de aciertos ÷ Total de pruebas) × 100. Por ejemplo, si el semáforo identifica correctamente 27 de 30 sonidos, obtendría un 90 % de aciertos. Si encontramos errores, revisamos los sonidos que el semáforo confundió y ajustamos la sensibilidad para mejorar su funcionamiento. Estas pruebas nos permiten comprobar qué tan bien funciona el semáforo antes de utilizarlo durante las clases. Los resultados se registran en el Laboratorio de pruebas.')
+        P('<b>Evaluación de la precisión del semáforo.</b> Para comprobar si nuestro semáforo funciona correctamente, realizamos 30 pruebas con sonidos producidos a propósito para cada categoría: 10 con un ambiente tranquilo (verde), 10 con conversaciones moderadas (amarillo) y 10 con ruido excesivo (rojo). En cada prueba observamos si la aplicación muestra el color correcto y registramos los aciertos y errores, calculando el porcentaje de aciertos con la fórmula: Precisión general = (Número de aciertos ÷ Total de pruebas) × 100. Por ejemplo, si el semáforo identifica correctamente 27 de 30 sonidos, obtendría un 90 % de aciertos. Si encontramos errores, revisamos los sonidos que el semáforo confundió y ajustamos la sensibilidad para mejorar su funcionamiento. Estas pruebas nos permiten comprobar qué tan bien funciona el semáforo antes de utilizarlo durante las clases.')
     },
     {
       id: 'pruebas', title: 'Pruebas', pending: false,
       body:
         P('La precisión del semáforo se evalúa con <b>30 pruebas independientes</b>: 10 de ambiente tranquilo, 10 de conversación moderada y 10 de ruido excesivo.') +
-        P('Precisión general = (aciertos ÷ pruebas completadas) × 100.') +
-        P('Los resultados se registran en el Laboratorio de pruebas.')
+        P('Precisión general = (aciertos ÷ pruebas completadas) × 100.')
     },
     {
       id: 'impacto', title: 'Evaluación del impacto', pending: false,
@@ -2318,7 +2317,7 @@ body:not(.show-adv) .controls .btn-go { min-width: 200px; min-height: 60px; font
 <script>/* js/app.js */
 /* ============================================================
    Semáforo de Clase — Aplicación
-   Navegación, semáforo en vivo, encuesta, laboratorio, impacto,
+   Navegación, semáforo en vivo, encuesta, panel del profesor,
    biblioteca, privacidad y conclusiones.
    ============================================================ */
 (function () {
